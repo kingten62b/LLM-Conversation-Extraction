@@ -47,3 +47,17 @@ export function getValidationSummary() {
 export function validateBatch(validations) {
   return api.post('/validate/batch', { validations })
 }
+
+// ── 上传 ──
+
+export function getDataSource() {
+  return api.get('/data-source')
+}
+
+export function uploadConversations(file) {
+  const form = new FormData()
+  form.append('file', file)
+  return api.post('/upload', form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+}

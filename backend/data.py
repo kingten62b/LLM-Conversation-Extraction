@@ -1,13 +1,40 @@
 import json
 import os
 
-DATA_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "task2_conversations.json")
+UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "upload")
+UPLOAD_FILE = os.path.join(UPLOAD_DIR, "conversations.json")
+DEFAULT_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "task2_conversations.json")
 RESULTS_FILE = os.path.join(os.path.dirname(__file__), "..", "output", "extraction_results.json")
 
 
 def load_conversations() -> list[dict]:
-    with open(DATA_FILE, "r", encoding="utf-8") as f:
+    """加载对话数据，优先使用上传的文件，否则使用默认数据文件"""
+    path = UPLOAD_FILE if os.path.exists(UPLOAD_FILE) else DEFAULT_FILE
+    with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
+
+
+def get_data_source() -> dict:
+    """返回当前数据来源信息"""
+    if os.path.exists(UPLOAD_FILE):
+        return {"source": "upload", "path": UPLOAD_FILE}
+    return {"source": "default", "path": DEFAULT_FILE}
+
+
+def save_uploaded_file(content: bytes) -> dict:
+    """保存上传的对话数据文件，返回保存结果"""
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    data = json.loads(content.decode("utf-8"))
+    if not isinstance(data, list):
+        raise ValueError("JSON 数据必须是数组格式")
+    if len(data) == 0:
+        raise ValueError("JSON 数组不能为空")
+    for i, item in enumerate(data):
+        if "id" not in item or "turns" not in item:
+            raise ValueError(f"第 {i+1} 条数据缺少必要字段 (id, turns)")
+    with open(UPLOAD_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    return {"conversations": len(data), "path": UPLOAD_FILE}
 
 
 def load_results() -> list[dict]:

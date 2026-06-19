@@ -7,11 +7,14 @@ if str(_root) not in sys.path:
     sys.path.insert(0, str(_root))
 
 import uvicorn
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from backend.data import load_conversations, load_results, save_results, compute_stats
+from backend.data import (
+    load_conversations, load_results, save_results, compute_stats,
+    save_uploaded_file, get_data_source,
+)
 from backend.extractor import extract_conversation, run_extraction
 
 app = FastAPI(title="客服对话提取 API", description="基于 LangChain 的客服对话结构化提取服务")
@@ -23,6 +26,27 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# ── 数据上传 ──
+
+@app.get("/api/data-source")
+def api_data_source():
+    return get_data_source()
+
+
+@app.post("/api/upload")
+async def api_upload(file: UploadFile = File(...)):
+    if not file.filename.endswith(".json"):
+        raise HTTPException(400, "仅支持 JSON 文件")
+    try:
+        content = await file.read()
+        result = save_uploaded_file(content)
+        return {"status": "ok", **result}
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    except Exception as e:
+        raise HTTPException(500, f"上传失败: {str(e)}")
 
 
 # ── 对话 ──
