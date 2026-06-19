@@ -12,20 +12,20 @@
 
 ### 字段说明
 
-| 字段 | 类型 | 取值范围 | 设计理由 |
-|------|------|----------|----------|
-| `conversation_id` | str | 对话唯一 ID | 标识每条记录 |
-| `channel` | str | 在线 / 电话 | 渠道分布统计 |
-| `agent` | str | 客服姓名 | 客服维度数据统计 |
-| `turn_count` | int | 对话轮数 | 工作量和复杂度评估 |
-| `user_issue_summary` | str | 一句话概括 | 快速浏览每条对话的核心诉求 |
-| `issue_categories` | list[str] | 9 个类别 | 多诉求场景支持；用于统计各类问题占比 |
-| `resolution_status` | str | resolved / partially_resolved / unresolved / pending | 客服的核心 KPI — 解决率 |
-| `resolution_action` | str | 具体措施描述 | 分析客服处理方式分布 |
-| `user_sentiment` | str | angry / negative / neutral / positive | 用户满意度评估 |
-| `urgency_level` | str | high / medium / low | 紧急事件标记和优先级排序 |
-| `requires_follow_up` | bool | true / false | 遗留任务追踪 |
-| `escalation_required` | bool | true / false | 转人工率监控 |
+| 字段                    | 类型      | 取值范围                                             | 设计理由                             |
+| ----------------------- | --------- | ---------------------------------------------------- | ------------------------------------ |
+| `conversation_id`     | str       | 对话唯一 ID                                          | 标识每条记录                         |
+| `channel`             | str       | 在线 / 电话                                          | 渠道分布统计                         |
+| `agent`               | str       | 客服姓名                                             | 客服维度数据统计                     |
+| `turn_count`          | int       | 对话轮数                                             | 工作量和复杂度评估                   |
+| `user_issue_summary`  | str       | 一句话概括                                           | 快速浏览每条对话的核心诉求           |
+| `issue_categories`    | list[str] | 9 个类别                                             | 多诉求场景支持；用于统计各类问题占比 |
+| `resolution_status`   | str       | resolved / partially_resolved / unresolved / pending | 客服的核心 KPI — 解决率             |
+| `resolution_action`   | str       | 具体措施描述                                         | 分析客服处理方式分布                 |
+| `user_sentiment`      | str       | angry / negative / neutral / positive                | 用户满意度评估                       |
+| `urgency_level`       | str       | high / medium / low                                  | 紧急事件标记和优先级排序             |
+| `requires_follow_up`  | bool      | true / false                                         | 遗留任务追踪                         |
+| `escalation_required` | bool      | true / false                                         | 转人工率监控                         |
 
 ### 问题类别体系
 
@@ -49,17 +49,17 @@
 
 ## 边界情况处理策略
 
-| 场景 | 案例 | 处理策略 |
-|------|------|----------|
-| **多诉求** | conv_06（退货+查快递） | `issue_categories` 支持多标签，summary 用分号分隔多个诉求 |
-| **转人工** | conv_09, conv_16 | `escalation_required=true`，按转人工后最终结果标注 resolution_status |
-| **话题切换** | conv_06 | 多轮语义连贯提取，LLM 自动捕捉完整上下文 |
-| **信息缺失** | conv_10（用户没想好问什么） | resolution_status = unresolved，标记为低优先级 |
-| **用户主动放弃** | conv_12, conv_25 | resolution_status = unresolved，requires_follow_up = false |
-| **负面情绪** | conv_05, conv_09, conv_25 | 准确标注 sentiment 等级，urgency 相应提高 |
-| **部分解决** | conv_03 | resolution_status = partially_resolved |
-| **建议/投诉** | conv_23 | 归入 投诉/建议 类别 |
-| **重复投诉** | conv_20（连续两次质量问题） | 在 summary 中体现历史背景 |
+| 场景                   | 案例                        | 处理策略                                                               |
+| ---------------------- | --------------------------- | ---------------------------------------------------------------------- |
+| **多诉求**       | conv_06（退货+查快递）      | `issue_categories` 支持多标签，summary 用分号分隔多个诉求            |
+| **转人工**       | conv_09, conv_16            | `escalation_required=true`，按转人工后最终结果标注 resolution_status |
+| **话题切换**     | conv_06                     | 多轮语义连贯提取，LLM 自动捕捉完整上下文                               |
+| **信息缺失**     | conv_10（用户没想好问什么） | resolution_status = unresolved，标记为低优先级                         |
+| **用户主动放弃** | conv_12, conv_25            | resolution_status = unresolved，requires_follow_up = false             |
+| **负面情绪**     | conv_05, conv_09, conv_25   | 准确标注 sentiment 等级，urgency 相应提高                              |
+| **部分解决**     | conv_03                     | resolution_status = partially_resolved                                 |
+| **建议/投诉**    | conv_23                     | 归入 投诉/建议 类别                                                    |
+| **重复投诉**     | conv_20（连续两次质量问题） | 在 summary 中体现历史背景                                              |
 
 ## AI 工具使用
 
@@ -105,12 +105,12 @@ python run_extraction.py
 
 人工抽检 7 条 × 6 个关键字段 = 42 个检查点，各字段准确率如下：
 
-| 字段 | 准确率 |
-|------|--------|
-| issue_categories | 待填写 |
-| resolution_status | 待填写 |
-| user_sentiment | 待填写 |
-| urgency_level | 待填写 |
-| requires_follow_up | 待填写 |
-| escalation_required | 待填写 |
-| **整体** | 待填写 |
+| 字段                | 准确率 |
+| ------------------- | ------ |
+| issue_categories    | 100%   |
+| resolution_status   | 71%    |
+| user_sentiment      | 86%    |
+| urgency_level       | 71%    |
+| requires_follow_up  | 86%    |
+| escalation_required | 86     |
+| **整体**      | 85.7%  |
