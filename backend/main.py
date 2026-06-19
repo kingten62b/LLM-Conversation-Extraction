@@ -130,6 +130,29 @@ def validate_field(req: ValidateRequest):
     raise HTTPException(404, f"Result for {req.conv_id} not found")
 
 
+class BatchValidateRequest(BaseModel):
+    validations: list[ValidateRequest]
+
+
+@app.post("/api/validate/batch")
+def validate_batch(req: BatchValidateRequest):
+    results = load_results()
+    result_map = {r["conversation_id"]: r for r in results}
+    added = 0
+    for v in req.validations:
+        conv = result_map.get(v.conv_id)
+        if conv is None:
+            continue
+        validations.append({
+            "conversation_id": v.conv_id,
+            "field": v.field,
+            "is_correct": v.is_correct,
+            "value": conv.get(v.field),
+        })
+        added += 1
+    return {"status": "ok", "added": added}
+
+
 @app.get("/api/validate/summary")
 def validate_summary():
     if not validations:

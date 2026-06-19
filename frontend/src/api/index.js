@@ -43,3 +43,7 @@ export function validateField(convId, field, isCorrect) {
 export function getValidationSummary() {
   return api.get('/validate/summary')
 }
+
+export function validateBatch(validations) {
+  return api.post('/validate/batch', { validations })
+}
